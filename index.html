@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>DAT.co Dashboard — Strategy BTC NAV / Diluted Share</title>
+    <meta
+      name="description"
+      content="A static DAT.co dashboard that tracks Strategy's BTC NAV per diluted share using CoinGecko treasury holdings, CoinGecko BTC prices, and Strategy's official diluted share snapshots."
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div class="page-shell">
+      <header class="hero">
+        <div class="hero-copy">
+          <p class="eyebrow">DAT.co assignment dashboard</p>
+          <h1>Strategy BTC NAV per Diluted Share</h1>
+          <p class="hero-text">
+            This dashboard tracks the estimated <strong>BTC NAV per diluted share</strong> for
+            <strong>Strategy (MSTR)</strong>. It combines daily Bitcoin price data, daily treasury
+            holdings, and official diluted-share snapshots.
+          </p>
+          <div class="formula-box">
+            <div>
+              <span class="formula-label">Formula</span>
+              <code>BTC NAV / Diluted Share = (BTC Holdings / Diluted Shares) × BTC Price</code>
+            </div>
+          </div>
+        </div>
+        <div class="hero-meta card">
+          <div class="meta-row">
+            <span>Status</span>
+            <strong id="syncStatus">Waiting for local data sync</strong>
+          </div>
+          <div class="meta-row">
+            <span>Latest data date</span>
+            <strong id="latestDate">—</strong>
+          </div>
+          <div class="meta-row">
+            <span>Generated at (UTC)</span>
+            <strong id="generatedAt">—</strong>
+          </div>
+          <div class="meta-row">
+            <span>Entity</span>
+            <strong id="entityName">Strategy (MSTR)</strong>
+          </div>
+        </div>
+      </header>
+
+      <section id="emptyState" class="callout hidden">
+        <h2>No live dataset yet</h2>
+        <p>
+          Run <code>python3 scripts/update_data.py</code> first. That command downloads the latest
+          source data and creates <code>data/indicator.json</code> for the website.
+        </p>
+      </section>
+
+      <section class="controls card">
+        <div>
+          <h2>Time window</h2>
+          <p>Switch between recent and full-year views.</p>
+        </div>
+        <div class="button-group" id="rangeButtons">
+          <button class="range-btn active" data-days="30">30D</button>
+          <button class="range-btn" data-days="90">90D</button>
+          <button class="range-btn" data-days="180">180D</button>
+          <button class="range-btn" data-days="365">365D</button>
+        </div>
+      </section>
+
+      <section class="metrics-grid" id="metricsGrid"></section>
+
+      <section class="card chart-card">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">Selected indicator</p>
+            <h2>BTC NAV per Diluted Share (USD)</h2>
+          </div>
+          <p class="section-note" id="indicatorNote">
+            Each point reflects Strategy's BTC holdings, BTC/USD price, and the most recent official
+            diluted-share snapshot available on that date.
+          </p>
+        </div>
+        <div class="chart-wrap large">
+          <canvas id="indicatorChart"></canvas>
+        </div>
+      </section>
+
+      <section class="support-grid">
+        <article class="card chart-card">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Support series</p>
+              <h2>BTC Holdings</h2>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="holdingsChart"></canvas>
+          </div>
+        </article>
+
+        <article class="card chart-card">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Support series</p>
+              <h2>BTC Price (USD)</h2>
+            </div>
+          </div>
+          <div class="chart-wrap">
+            <canvas id="priceChart"></canvas>
+          </div>
+        </article>
+      </section>
+
+      <section class="analysis-grid">
+        <article class="card">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Automatic summary</p>
+              <h2>Trend interpretation</h2>
+            </div>
+          </div>
+          <div id="summaryText" class="summary-text">
+            Run the sync script to generate the latest summary.
+          </div>
+        </article>
+
+        <article class="card">
+          <div class="section-heading compact">
+            <div>
+              <p class="eyebrow">Methodology</p>
+              <h2>How the indicator is built</h2>
+            </div>
+          </div>
+          <ol class="method-list">
+            <li>Download Strategy's daily BTC holdings history.</li>
+            <li>Download Bitcoin daily USD prices.</li>
+            <li>Use Strategy's official diluted-share snapshots.</li>
+            <li>Forward-fill diluted shares between official snapshot dates.</li>
+            <li>Compute BTC per diluted share and then BTC NAV per diluted share.</li>
+          </ol>
+          <div id="shareSnapshotTable"></div>
+        </article>
+      </section>
+
+      <section class="card">
+        <div class="section-heading compact">
+          <div>
+            <p class="eyebrow">Data provenance</p>
+            <h2>Sources</h2>
+          </div>
+        </div>
+        <div id="sourcesTable"></div>
+      </section>
+
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
